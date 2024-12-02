@@ -1,27 +1,18 @@
 package com.restaurantapp.model;
 
 public class Customer extends Person {
-    private String customerId;
     private String phoneNumber;
     private String orderHistory;
 
     // Constructor
-    public Customer(String name, int age, String address, String customerId, String phoneNumber) {
+    public Customer(String name, int age, String address,  String phoneNumber) {
         super(name, age, address);
-        this.customerId = customerId;
         this.phoneNumber = phoneNumber;
         this.orderHistory = "";
     }
 
-    // Getter for customerId
-    public String getCustomerId() {
-        return customerId;
-    }
 
-    // Setter for customerId
-    public void setCustomerId(String customerId) {
-        this.customerId = customerId;
-    }
+
 
     // Getter for phoneNumber
     public String getPhoneNumber() {
@@ -33,9 +24,6 @@ public class Customer extends Person {
         this.phoneNumber = phoneNumber;
     }
 
-    public String getId() {
-        return this.customerId;
-    }
 
     // Getter for orderHistory
     public String getOrderHistory() {
@@ -62,7 +50,7 @@ public class Customer extends Person {
     // Overridden getDetails method to include Customer-specific details
     @Override
     public String getDetails() {
-        return super.getDetails() + ", Customer ID: " + customerId + ", Phone: " + phoneNumber;
+        return super.getDetails() + ", Phone: " + phoneNumber;
     }
 
     // Example method for getting a specific order (could be expanded based on how you track orders)
@@ -77,7 +65,6 @@ public class Customer extends Person {
                 "Name='" + super.getName() + '\'' +
                 ", Age=" + super.getAge() +
                 ", Address='" + super.getAddress() + '\'' +
-                ", Customer ID='" + customerId + '\'' +
                 ", Phone Number='" + phoneNumber + '\'' +
                 ", Order History='" + (orderHistory.isEmpty() ? "No orders yet." : orderHistory.trim()) + '\'' +
                 '}';

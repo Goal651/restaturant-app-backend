@@ -1,6 +1,7 @@
 package com.restaurantapp.model;
 
 import java.util.ArrayList;
+import com.restaurantapp.DAOS.MenuItemDAO;
 
 public class MenuItem {
     private String itemName;
@@ -29,6 +30,18 @@ public class MenuItem {
 
     public double getPrice() {
         return this.price;
+    }
+
+    public String getCategory(){
+        return this.category;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
+    public String getItemName() {
+        return this.itemName;
     }
 
     public ArrayList<String> getIngredients() {

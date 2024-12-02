@@ -1,8 +1,9 @@
 import com.restaurantapp.DAOS.CustomerDAO;
+import com.restaurantapp.DAOS.MenuItemDAO;
 import com.restaurantapp.db.DBConfig;
 import com.restaurantapp.model.Customer;
-import com.restaurantapp.model.Staff;
 import com.restaurantapp.model.MenuItem;
+import com.restaurantapp.model.Staff;
 import com.restaurantapp.utils.Menu;
 
 import java.sql.Connection;
@@ -15,7 +16,6 @@ public class Main {
     private static final Menu menu = new Menu();
     private static final DBConfig dbConfig = new DBConfig();
     private static Connection connection;
-    private final static CustomerDAO customerDAO = new CustomerDAO(connection);
 
 
     public static void main(String[] args) {
@@ -26,10 +26,9 @@ public class Main {
             System.exit(1);
         }
 
-
         while (true) {
             displayMainMenu();
-            int choice = getValidatedChoice(1, 10); // Updated to reflect more choices
+            int choice = getValidatedChoice(1, 12); // Updated to reflect more choices
 
             switch (choice) {
                 case 1 -> addCustomer();
@@ -41,9 +40,12 @@ public class Main {
                 case 7 -> viewStaff();
                 case 8 -> searchCustomerById();
                 case 9 -> searchStaffByName();
-                case 10 -> exitApp();
+                case 10 -> editMenuItem();
+                case 11 -> deleteMenuItem();
+                case 12 -> exitApp();
                 default -> System.out.println("Invalid choice. Please try again.");
             }
+
         }
     }
 
@@ -58,9 +60,12 @@ public class Main {
         System.out.println("7. View Staff");
         System.out.println("8. Search Customer by ID");
         System.out.println("9. Search Staff by Name");
-        System.out.println("10. Exit");
+        System.out.println("10. Edit Menu Item");
+        System.out.println("11. Delete Menu Item");
+        System.out.println("12. Exit");
         System.out.print("Enter your choice: ");
     }
+
 
     private static int getValidatedChoice(int min, int max) {
         while (!scanner.hasNextInt()) {
@@ -73,20 +78,23 @@ public class Main {
     }
 
     private static void addCustomer() {
+        CustomerDAO customerDAO = new CustomerDAO(connection);
         System.out.print("Enter customer name: ");
         String name = scanner.nextLine();
         System.out.print("Enter customer age (must be a positive number): ");
         int age = getValidatedIntInput();
         System.out.print("Enter customer address: ");
         String address = scanner.nextLine();
-        System.out.print("Enter customer ID: ");
-        String id = scanner.nextLine();
         System.out.print("Enter customer phone number: ");
         String phone = scanner.nextLine();
+        Customer customer = new Customer(name, age, address, phone);
+        boolean result = customerDAO.addCustomer(customer);
+        if (result) {
+            System.out.println("Customer added successfully!");
+        } else {
+            System.out.println("An error occurred while adding customer");
+        }
 
-        Customer customer = new Customer(name, age, address, id, phone);
-        customerDAO.addCustomer(customer);
-        System.out.println("Customer added successfully!");
     }
 
     private static void addStaff() {
@@ -109,6 +117,8 @@ public class Main {
     }
 
     private static void addMenuItem() {
+        MenuItemDAO menuItemDAO = new MenuItemDAO(connection);
+        System.out.println(connection);
         System.out.print("Enter menu item name: ");
         String name = scanner.nextLine();
         System.out.print("Enter menu item price (must be positive): ");
@@ -124,28 +134,23 @@ public class Main {
             ingredients.add(ingredient.trim());
         }
 
-        MenuItem menuItem = new MenuItem(name, price, category, description, ingredients);
-        menu.addItem(menuItem);
-        System.out.println("Menu item added successfully!");
+        boolean result = menuItemDAO.addMenuItem(name, price, category, description, ingredients);
+        if (result) {
+            System.out.println("Menu item added successfully!");
+        }else{
+            System.out.println("An error occurred while adding menu item");
+        }
+
     }
 
     private static void placeOrder() {
+        CustomerDAO customerDAO = new CustomerDAO(connection);
         System.out.print("Enter customer ID: ");
         String customerId = scanner.nextLine();
         List<Customer> customers = customerDAO.getAllCustomers();
-        Customer customer = customers.stream()
-                .filter(c -> c.getId().equals(customerId))
-                .findFirst()
-                .orElse(null);
-
-        if (customer == null) {
-            System.out.println("Customer not found!");
-            return;
-        }
 
         System.out.print("Enter the item to order: ");
         String orderItem = scanner.nextLine();
-        customer.placeOrder(orderItem);
         System.out.println("Order placed successfully!");
     }
 
@@ -154,6 +159,7 @@ public class Main {
     }
 
     private static void viewCustomers() {
+        CustomerDAO customerDAO = new CustomerDAO(connection);
         List<Customer> customers = customerDAO.getAllCustomers();
         if (customers.isEmpty()) {
             System.out.println("No customers available.");
@@ -167,8 +173,9 @@ public class Main {
     }
 
     private static void searchCustomerById() {
+        CustomerDAO customerDAO = new CustomerDAO(connection);
         System.out.print("Enter Customer ID: ");
-        String id = scanner.nextLine();
+        int id = scanner.nextInt();
         Customer customer = customerDAO.getCustomerById(id);
         if (customer == null) {
             System.out.println("No customer found with ID: " + id);
@@ -208,4 +215,84 @@ public class Main {
         scanner.nextLine(); // Consume newline
         return input;
     }
+    // Inside the Main class
+
+    private static void editMenuItem() {
+        MenuItemDAO menuItemDAO = new MenuItemDAO(connection);
+        System.out.print("Enter the ID of the menu item to edit: ");
+        int itemId = getValidatedIntInput();
+
+        MenuItem menuItem = menuItemDAO.getMenuItemById(itemId);
+        if (menuItem == null) {
+            System.out.println("No menu item found with the provided ID.");
+            return;
+        }
+
+        System.out.println("Editing Menu Item: " + menuItem.getItemName());
+        System.out.print("Enter new name (or press Enter to keep '" + menuItem.getItemName() + "'): ");
+        String newName = scanner.nextLine();
+        if (newName.isEmpty()) newName = menuItem.getItemName();
+
+        System.out.print("Enter new price (or press Enter to keep '" + menuItem.getPrice() + "'): ");
+        double newPrice = getValidatedOptionalDoubleInput(menuItem.getPrice());
+
+        System.out.print("Enter new category (or press Enter to keep '" + menuItem.getCategory() + "'): ");
+        String newCategory = scanner.nextLine();
+        if (newCategory.isEmpty()) newCategory = menuItem.getCategory();
+
+        System.out.print("Enter new description (or press Enter to keep current description): ");
+        String newDescription = scanner.nextLine();
+        if (newDescription.isEmpty()) newDescription = menuItem.getDescription();
+
+        System.out.print("Enter new ingredients (comma-separated) or press Enter to keep current ingredients: ");
+        String ingredientsInput = scanner.nextLine();
+        ArrayList<String> newIngredients = ingredientsInput.isEmpty()
+                ? menuItem.getIngredients()
+                : new ArrayList<>(List.of(ingredientsInput.split(",")));
+
+        boolean updated = menuItemDAO.updateMenuItem(itemId, newName, newPrice, newCategory, newDescription, newIngredients);
+        if (updated) {
+            System.out.println("Menu item updated successfully.");
+        } else {
+            System.out.println("An error occurred while updating the menu item.");
+        }
+    }
+
+    private static void deleteMenuItem() {
+        MenuItemDAO menuItemDAO = new MenuItemDAO(connection);
+        System.out.print("Enter the ID of the menu item to delete: ");
+        int itemId = getValidatedIntInput();
+
+        MenuItem menuItem = menuItemDAO.getMenuItemById(itemId);
+        if (menuItem == null) {
+            System.out.println("No menu item found with the provided ID.");
+            return;
+        }
+
+        System.out.println("Are you sure you want to delete the menu item '" + menuItem.getItemName() + "'? (yes/no)");
+        String confirmation = scanner.nextLine();
+        if (!confirmation.equalsIgnoreCase("yes")) {
+            System.out.println("Delete operation canceled.");
+            return;
+        }
+
+        boolean deleted = menuItemDAO.deleteMenuItem(itemId);
+        if (deleted) {
+            System.out.println("Menu item deleted successfully.");
+        } else {
+            System.out.println("An error occurred while deleting the menu item.");
+        }
+    }
+
+    private static double getValidatedOptionalDoubleInput(double defaultValue) {
+        String input = scanner.nextLine();
+        if (input.isEmpty()) return defaultValue;
+        try {
+            return Double.parseDouble(input);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Keeping the current value: " + defaultValue);
+            return defaultValue;
+        }
+    }
+
 }

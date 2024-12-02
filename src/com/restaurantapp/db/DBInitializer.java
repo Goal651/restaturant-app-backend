@@ -4,9 +4,10 @@ import java.sql.Connection;
 import java.sql.Statement;
 
 public class DBInitializer {
-    private final Connection connection = new DBConfig().getConnection();
+    private Connection connection;
 
-    public void initializeTables() {
+    public void initializeTables(Connection connection) {
+        this.connection = connection;
         createCustomersTable();
         createStaffTable();
         createMenuTable();
@@ -15,7 +16,7 @@ public class DBInitializer {
     private void createCustomersTable() {
         String createTableSQL = """
                     CREATE TABLE IF NOT EXISTS customers (
-                        customer_id VARCHAR(50) PRIMARY KEY,
+                        customer_id SERIAL PRIMARY KEY,
                         name VARCHAR(100) NOT NULL,
                         age INT NOT NULL,
                         address VARCHAR(255),

@@ -1,11 +1,16 @@
 package com.restaurantapp.utils;
 
+import com.restaurantapp.DAOS.MenuItemDAO;
+import com.restaurantapp.db.DBConfig;
 import com.restaurantapp.model.MenuItem;
 
+import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Menu {
     private ArrayList<MenuItem> menuItems;
+    private final Connection connection = new DBConfig().getConnection();
 
     public Menu() {
         menuItems = new ArrayList<>();
@@ -25,8 +30,9 @@ public class Menu {
 
     // Print out the entire menu
     public void getMenu() {
+        List<MenuItem> menuItem=new MenuItemDAO(connection).getAllMenuItems();
         System.out.println("Restaurant Menu:");
-        for (MenuItem item : menuItems) {
+        for (MenuItem item : menuItem) {
             item.getDetails();
         }
     }

@@ -14,17 +14,18 @@ public class CustomerDAO {
     }
 
     // Add a customer to the database
-    public void addCustomer(Customer customer) {
-        String query = "INSERT INTO customers (id, name, age, address, phone) VALUES (?, ?, ?, ?, ?)";
+    public boolean addCustomer(Customer customer) {
+        String query = "INSERT INTO customers ( name, age, address, phone_number) VALUES ( ?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, customer.getCustomerId());
-            stmt.setString(2, customer.getName());
-            stmt.setInt(3, customer.getAge());
-            stmt.setString(4, customer.getAddress());
-            stmt.setString(5, customer.getPhoneNumber());
+            stmt.setString(1, customer.getName());
+            stmt.setInt(2, customer.getAge());
+            stmt.setString(3, customer.getAddress());
+            stmt.setString(4, customer.getPhoneNumber());
             stmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
             System.err.println("Error adding customer: " + e.getMessage());
+            return false;
         }
     }
 
@@ -39,8 +40,7 @@ public class CustomerDAO {
                         rs.getString("name"),
                         rs.getInt("age"),
                         rs.getString("address"),
-                        rs.getString("id"),
-                        rs.getString("phone")
+                        rs.getString("phone_number")
                 );
                 customers.add(customer);
             }
@@ -51,18 +51,17 @@ public class CustomerDAO {
     }
 
     // Retrieve a customer by their ID
-    public Customer getCustomerById(String customerId) {
-        String query = "SELECT * FROM customers WHERE id = ?";
+    public Customer getCustomerById(int customerId) {
+        String query = "SELECT * FROM customers WHERE customer_id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, customerId);
+            stmt.setInt(1, customerId);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return new Customer(
                             rs.getString("name"),
                             rs.getInt("age"),
                             rs.getString("address"),
-                            rs.getString("id"),
-                            rs.getString("phone")
+                            rs.getString("phone_number")
                     );
                 }
             }
@@ -74,13 +73,12 @@ public class CustomerDAO {
 
     // Update an existing customer's details
     public boolean updateCustomer(Customer customer) {
-        String query = "UPDATE customers SET name = ?, age = ?, address = ?, phone = ? WHERE id = ?";
+        String query = "UPDATE customers SET name = ?, age = ?, address = ?, phone = ? WHERE customer_id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, customer.getName());
             stmt.setInt(2, customer.getAge());
             stmt.setString(3, customer.getAddress());
             stmt.setString(4, customer.getPhoneNumber());
-            stmt.setString(5, customer.getCustomerId());
             int rowsUpdated = stmt.executeUpdate();
             return rowsUpdated > 0;
         } catch (SQLException e) {
@@ -91,7 +89,7 @@ public class CustomerDAO {
 
     // Delete a customer from the database
     public boolean deleteCustomer(String customerId) {
-        String query = "DELETE FROM customers WHERE id = ?";
+        String query = "DELETE FROM customers WHERE customer_id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, customerId);
             int rowsDeleted = stmt.executeUpdate();
@@ -114,7 +112,6 @@ public class CustomerDAO {
                             rs.getString("name"),
                             rs.getInt("age"),
                             rs.getString("address"),
-                            rs.getString("id"),
                             rs.getString("phone")
                     );
                     customers.add(customer);
