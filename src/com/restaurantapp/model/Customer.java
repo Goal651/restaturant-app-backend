@@ -5,14 +5,11 @@ public class Customer extends Person {
     private String orderHistory;
 
     // Constructor
-    public Customer(String name, int age, String address,  String phoneNumber) {
+    public Customer(String name, int age, String address, String phoneNumber) {
         super(name, age, address);
         this.phoneNumber = phoneNumber;
         this.orderHistory = "";
     }
-
-
-
 
     // Getter for phoneNumber
     public String getPhoneNumber() {
@@ -23,7 +20,6 @@ public class Customer extends Person {
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
-
 
     // Getter for orderHistory
     public String getOrderHistory() {
@@ -61,12 +57,11 @@ public class Customer extends Person {
     // Overridden toString method
     @Override
     public String toString() {
-        return "Customer{" +
-                "Name='" + super.getName() + '\'' +
+        return "Name='" + super.getName() + '\'' +
                 ", Age=" + super.getAge() +
                 ", Address='" + super.getAddress() + '\'' +
                 ", Phone Number='" + phoneNumber + '\'' +
-                ", Order History='" + (orderHistory.isEmpty() ? "No orders yet." : orderHistory.trim()) + '\'' +
-                '}';
+                ", Order History='" + (orderHistory.isEmpty() ?
+                "No orders yet." : orderHistory.trim()) + '\'';
     }
 }
